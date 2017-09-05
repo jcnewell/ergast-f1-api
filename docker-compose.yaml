@@ -1,0 +1,40 @@
+ergastdb:
+  container_name: ergastdb
+  build: ergastdb/
+  environment:
+    MYSQL_ROOT_PASSWORD: f1
+    MYSQL_DATABASE: ergastdb
+  expose:
+    - "3306"
+
+## Link an RStudio container to the ergastdb database server 
+#f1dj_rstudio:
+#  image: rocker/tidyverse 
+#  ports:
+#    - "8787:8787"
+#  links:
+#    - ergastdb:ergastdb
+#  volumes:
+#    - ./rstudio:/home/rstudio
+## Test the connection using:
+##library(RMySQL)
+##con=dbConnect(MySQL(),user='root',password='f1',host='ergastdb',port=3306,dbname='ergastdb')
+## dbListTables(con)  
+
+web:
+  build: ./lamp
+  #image: nimmis/apache-php5
+  ports:
+    - '8000:80'
+  volumes:
+    - ./webroot:/var/www/html
+    - ./php/api:/php/api
+    - ./logs:/var/log/apache2
+  links:
+    - ergastdb:ergastdb
+
+    
+#docker-compose up --build -d
+#docker-compose build --force-rm
+#docker-compose up -d
+
