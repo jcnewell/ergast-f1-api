@@ -6,8 +6,8 @@ Based on the [`ergast-f1-api`](https://github.com/jcnewell/ergast-f1-api), a PHP
 
 - install docker
 - download and unzip the contents repository 
-- cd into the root folder and run: `docker-compose up --build -d`
-- test the API at: `http://localhost:8000/api/f1/2017.json`
+- cd into the root folder and run: `docker-compose up --build -d --remove-orphans`
+- give everything a minute or to to come up and then test the API at: `http://localhost:8000/api/f1/2017.json`
 
 ## Instructions For Configuring API Server Independently
 
