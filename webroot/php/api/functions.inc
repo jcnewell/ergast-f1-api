@@ -98,7 +98,7 @@ header("HTTP/1.0 $code $message");
     <title>Error</title>
   </head>
   <body>
-    <h3><?php echo $message ?></h3>
+    <h3><?php echo htmlspecialchars($message) ?></h3>
   </body>
 </html>
 <?php
