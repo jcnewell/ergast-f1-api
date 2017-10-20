@@ -21,9 +21,9 @@ if(array_key_exists('limit', $fields)) {
 if(array_key_exists('offset', $fields)) {
   $offset = $fields['offset'];
 }
-if(!isset($limit)) $limit = 30;
+if(!isset($limit) || !is_numeric($limit)) $limit = 30;
 if($limit > 1000) $limit = 1000;
-if(!isset($offset)) $offset = 0;
+if(!isset($offset) || !is_numeric($offset)) $offset = 0;
 
 $callback = $fields['callback'];
 if(isset($callback)) {
