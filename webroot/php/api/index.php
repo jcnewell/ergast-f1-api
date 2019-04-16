@@ -16,13 +16,13 @@ if($period !== FALSE) {
 parse_str($urlComponents['query'], $fields);
 
 if(array_key_exists('limit', $fields)) {
-  $limit = $fields['limit'];
+  $limit = intval($fields['limit']);
 }
 if(array_key_exists('offset', $fields)) {
-  $offset = $fields['offset'];
+  $offset = intval($fields['offset']);
 }
 if(!isset($limit)) $limit = 30;
-if($limit > 1000) $limit = 1000;
+#if($limit > 1000) $limit = 1000;
 if(!isset($offset)) $offset = 0;
 
 $callback = $fields['callback'];
@@ -85,6 +85,7 @@ $driverStandings = NULL;
 $constructorStandings = NULL;
 $grid = NULL;
 $fastest = NULL;
+$qualifying = NULL;
 
 for($i=$n; $i<$n+17; $i+=2) {
   if(isset($segments[$i])) {
@@ -234,13 +235,27 @@ for($i=$n; $i<$n+17; $i+=2) {
         }
         break;
       case "qualifying":
-        if(isset($segments[$i+1])) {
-          // "qualifying" can only be last segment.
+        if($qualifying) {
           error(400, "Bad Request");
         } else {
-          break 2;
+          if($segments[$i+1]) {
+            if(is_numeric($segments[$i+1])) {
+              $qualifying = intval($segments[$i+1]);
+            } else {
+              error(400, "Bad Request");
+            }
+          } else {
+            break 2;
+          }        
         }
         break;
+        //if(isset($segments[$i+1])) {
+        //  // "qualifying" can only be last segment.
+        //  error(400, "Bad Request");
+        //} else {
+        //  break 2;
+        //}
+        //break;
       case "seasons":
         if(isset($segments[$i+1])) {
           // "seasons" can only be last segment.
@@ -262,6 +277,14 @@ for($i=$n; $i<$n+17; $i+=2) {
     }
   } else {
     break;
+  }
+}
+
+if($limit > 1000) {
+  if(strcmp($key, "laps") == 0) {
+    $limit = 2000;
+  } else {
+    $limit = 1000;
   }
 }
 
