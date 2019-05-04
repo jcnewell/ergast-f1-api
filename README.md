@@ -1,3 +1,9 @@
+# Ergast nodeJS API
+In this period we are working to improve the server, specifically we want to make it faster in response times. 
+After analyzing our current architecture we realized that using PHP is not the best and therefore we are moving to nodeJS. 
+If you have any advice on how to improve the javascript code we are happy to hear your proposal.
+All the files of the nodeJS project are contained in the ErgastNodeJS folder. Local computer must run mysql server with the recoverable database image at this address: http://ergast.com/mrd/db/
+
 # ergast Local API Server
 
 Based on the [`ergast-f1-api`](https://github.com/jcnewell/ergast-f1-api), a PHP-based API using the [Ergast Formula One MySQL database](http://ergast.com/mrd/) developed by Chris Newell.
