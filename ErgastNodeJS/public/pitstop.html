@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Pitstop Guide</title>
+</head>
+<body>
+    <h2>Pit stops API</h2>
+    <br>
+    <p>If at the bottom of the url you add these parameters you can change the limit and offset values, by default they are set to 30 and 0 <br><b>?limit=100&offset=2</b></p>
+    <br>
+    <p>
+        <h3>/pitstops/year/round</h3>
+        <h4>E.G. /pitstops/2019/2</h4>
+        <p>Returns the pit stops made in the second race of 2019</p>
+    </p>
+    <br>
+    <p>
+        <h3>/pitstops/year/round/pitstop/numberPitStop</h3>
+        <h4>E.G. /pitstops/2019/2/pitstop/1</h4>
+        <p>Returns to the pit stops made in the second race of 2019 only the first ones</p>
+    </p>
+    <br>
+    <p>
+        <h3>/pitstops/year/round/pitstop/numberPitStop/driver/driverId</h3>
+        <h4>E.G. /pitstops/2019/2/pitstop/1/driver/stroll</h4>
+        <p>Returns the first pitstop made in the second race of 2019 by the selected driver</p>
+    </p>
+    <br>
+    <p>
+        <h3>/pitstops/year/round/driver/driverId</h3>
+        <h4>E.G. /pitstops/2019/2/driver/vettel</h4>
+        <p>Returns the pit stops made the second race of 2019 by the selected driver</p>
+    </p>
+    <br>
+    <p>
+        <h3>/pitstops/year/round/lap/numberLap</h3>
+        <h4>E.G. /pitstops/2019/2/lap/1</h4>
+        <p>Returns the pit stops made on the first lap in the second race of 2019</p>
+    </p>
+    <br>
+    <p>
+        <h3>/pitstops/year/round/lap/numberLap/driver/driverId</h3>
+        <h4>E.G. /pitstops/2019/2/lap/1/driver/stroll</h4>
+        <p>The pitstop performed on the first lap of the second race in 2019 by the selected driver returns</p>
+    </p>
+</body>
+</html>
