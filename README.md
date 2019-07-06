@@ -2,7 +2,7 @@
 In this period we are working to improve the server, specifically we want to make it faster in response times. 
 After analyzing our current architecture we realized that using PHP is not the best and therefore we are moving to nodeJS. 
 If you have any advice on how to improve the javascript code we are happy to hear your proposal.
-All the files of the nodeJS project are contained in the ErgastNodeJS folder. Local computer must run mysql server with the recoverable database image at this address: http://ergast.com/mrd/db/
+The current repository to find these files and how to install the server is located [`in this repository`](https://github.com/Edivad99/NJS-ErgastF1API)
 
 # ergast Local API Server
 
