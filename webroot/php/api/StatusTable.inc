@@ -24,11 +24,11 @@ if($round) $query .= " AND ra.round='$round'";
 $query .= " GROUP BY st.statusId ORDER BY st.statusId LIMIT $offset, $limit";
 
 //echo "$query<br>\n<br>\n";
-$result = mysql_query($query) or die('I cannot select from the database because: ' . mysql_error());
+$result = mysqli_query($mysqli, $query) or die('I cannot select from the database because: ' . mysqli_error());
 if($result) {
   $query = "SELECT FOUND_ROWS()";
-  $found_rows_result = mysql_query($query) or die('I cannot select from the database because: ' . mysql_error());
-  $row = mysql_fetch_row($found_rows_result);
+  $found_rows_result = mysqli_query($mysqli, $query) or die('I cannot select from the database because: ' . mysqli_error());
+  $row = mysqli_fetch_row($found_rows_result);
   $total = $row[0];
   if(strcmp($format, "xml") == 0) {
     doXMLHeader($url, $series, $limit, $offset, $total);
@@ -43,7 +43,7 @@ if($result) {
     if(isset($results)) echo " position=\"$results\"";
     if(isset($status)) echo " statusId=\"$status\"";
     echo ">\n";
-    while($row = @mysql_fetch_array($result)) {
+    while($row = @mysqli_fetch_array($result)) {
       $statusId = $row[0];
       $status = $row[1];
       $count = $row[2];
@@ -68,11 +68,11 @@ if($result) {
     if(isset($results)) echo "\"position\":\"$results\",";
     if(isset($status)) echo "\"status\":\"$status\",";
     
-    $numRows = mysql_num_rows($result);
+    $numRows = mysqli_num_rows($result);
     echo "\"Status\":[";
     if($numRows > 0) {
       for($i=1; $i<=$numRows; $i++) {
-        $row = @mysql_fetch_array($result);
+        $row = @mysqli_fetch_array($result);
         $statusId = $row[0];
         $status = $row[1];
         $count = $row[2];

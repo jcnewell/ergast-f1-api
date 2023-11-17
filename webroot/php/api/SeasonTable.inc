@@ -1,5 +1,5 @@
 <?php
-if(($driverStandings || $constructorStandings) && ($circuits || $grid || $fastest || $results || $status)) error(400, "Bad Request: Cannot combine standings with circuit, grid, result or status qualifiers.");
+if(($driverStandings || $constructorStandings) && ($circuit || $grid || $fastest || $results || $status)) error(400, "Bad Request: Cannot combine standings with circuit, grid, result or status qualifiers.");
 $query = "SELECT SQL_CALC_FOUND_ROWS DISTINCT s.year, s.url FROM seasons s";
 
 if($driver) $query .= ", drivers dr";
@@ -53,11 +53,11 @@ if($driverStandings || $constructorStandings) {
 $query .= " ORDER BY s.year LIMIT $offset, $limit";
 //echo "$query<br>\n<br>\n";
 
-$result = mysql_query($query) or die('I cannot select from the database because: ' . mysql_error());
+$result = mysqli_query($mysqli, $query) or die('I cannot select from the database because: ' . mysqli_error());
 if($result) {
   $query = "SELECT FOUND_ROWS()";
-  $found_rows_result = mysql_query($query) or die('I cannot select from the database because: ' . mysql_error());
-  $row = mysql_fetch_row($found_rows_result);
+  $found_rows_result = mysqli_query($mysqli, $query) or die('I cannot select from the database because: ' . mysqli_error());
+  $row = mysqli_fetch_row($found_rows_result);
   $total = $row[0];
   if(strcmp($format, "xml") == 0) {
     doXMLHeader($url, $series, $limit, $offset, $total);
@@ -75,7 +75,7 @@ if($result) {
     if(isset($status)) echo " statusId=\"$status\"";
 
     echo ">\n";
-    while($row = @mysql_fetch_array($result)) {
+    while($row = @mysqli_fetch_array($result)) {
       $season = $row['year'];
       $url = $row['url'];
       echo "\t\t<Season url=\"$url\">$season</Season>\n";
@@ -101,11 +101,11 @@ if($result) {
     if(isset($results)) echo "\"position\":\"$results\",";
     if(isset($status)) echo "\"status\":\"$status\",";
     
-    $numRows = mysql_num_rows($result);
+    $numRows = mysqli_num_rows($result);
     echo "\"Seasons\":[";
     if($numRows > 0) {
       for($i=1; $i<=$numRows; $i++) {
-        $row = @mysql_fetch_array($result);
+        $row = @mysqli_fetch_array($result);
         $season = $row['year'];
         $url = escape($row['url']);
         echo "{\"season\":\"$season\",\"url\":\"$url\"}";

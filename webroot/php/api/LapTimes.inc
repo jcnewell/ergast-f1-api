@@ -18,13 +18,14 @@ if($laps) $query .= " AND la.lap='$laps'";
 $query .= " ORDER BY la.lap, la.position LIMIT $offset, $limit";
 
 //echo "$query<br>\n<br>\n";
-$result = mysql_query($query) or die('I cannot select from the database because: ' . mysql_error());
+$result = mysqli_query($mysqli, $query) or die('I cannot select from the database because: ' . mysqli_error());
 
 if($result) {
   $query = "SELECT FOUND_ROWS()";
-  $found_rows_result = mysql_query($query) or die('I cannot select from the database because: ' . mysql_error());
-  $row = mysql_fetch_row($found_rows_result);
+  $found_rows_result = mysqli_query($mysqli, $query) or die('I cannot select from the database because: ' . mysqli_error());
+  $row = mysqli_fetch_row($found_rows_result);
   $total = $row[0];
+  $currentLap = NULL;
   $doRaceHeader = true;
   
   if(strcmp($format, "xml") == 0) {
@@ -36,7 +37,7 @@ if($result) {
     if(isset($driver)) echo " driverId=\"$driver\"";
     if(isset($laps)) echo " lap=\"$laps\"";
     echo ">\n";
-    while($row = @mysql_fetch_array($result)) {
+    while($row = @mysqli_fetch_array($result)) {
       $driverRef = $row[14];
       $lap = $row[15];
       $position = $row[16];
@@ -102,10 +103,10 @@ if($result) {
     if(isset($driver)) echo ",\"driverId\":\"$driver\"";
     if(isset($lap)) echo ",\"lap\":\"$lap\"";
   
-    $numRows = mysql_num_rows($result);
+    $numRows = mysqli_num_rows($result);
     echo ",\"Races\":[";
     if($numRows > 0) {
-      while($row = @mysql_fetch_array($result)) {
+      while($row = @mysqli_fetch_array($result)) {
         $driverRef = $row[14];
         $lap = $row[15];
         $position = $row[16];

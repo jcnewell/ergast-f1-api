@@ -19,12 +19,12 @@ if($laps) $query .= " AND pi.lap='$laps'";
 $query .= " ORDER BY pi.time LIMIT $offset, $limit";
 
 //echo "$query<br>\n<br>\n";
-$result = mysql_query($query) or die('I cannot select from the database because: ' . mysql_error());
+$result = mysqli_query($mysqli, $query) or die('I cannot select from the database because: ' . mysqli_error());
 
 if($result) {
   $query = "SELECT FOUND_ROWS()";
-  $found_rows_result = mysql_query($query) or die('I cannot select from the database because: ' . mysql_error());
-  $row = mysql_fetch_row($found_rows_result);
+  $found_rows_result = mysqli_query($mysqli, $query) or die('I cannot select from the database because: ' . mysqli_error());
+  $row = mysqli_fetch_row($found_rows_result);
   $total = $row[0];
   $doRaceHeader = true;
   
@@ -40,7 +40,7 @@ if($result) {
     if(isset($laps)) echo " lap=\"$laps\"";
     echo ">\n";
     
-    while($row = @mysql_fetch_array($result)) {
+    while($row = @mysqli_fetch_array($result)) {
       $driverRef = $row[14];
       $stop = $row[15];
       $lap = $row[16];
@@ -99,10 +99,10 @@ if($result) {
     if(isset($pitstops)) echo ",\"stop\":\"$pitstops\"";
     if(isset($laps)) echo ",\"lap\":\"$laps\"";
     
-    $numRows = mysql_num_rows($result);
+    $numRows = mysqli_num_rows($result);
     echo ",\"Races\":[";
     if($numRows > 0) {
-      while($row = @mysql_fetch_array($result)) {
+      while($row = @mysqli_fetch_array($result)) {
         $driverRef = $row[14];
         $stop = $row[15];
         $lap = $row[16];

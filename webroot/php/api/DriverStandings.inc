@@ -13,20 +13,23 @@ if($round) {
   $query .= " AND r.round='$round'";
 } else {
   if($year) {
-    $query .= " AND r.round=(SELECT MAX(round) FROM driverStandings ds, races r WHERE ds.raceId=r.raceId AND r.year='$year')";
+    //$query .= " AND r.round=(SELECT MAX(r.round) FROM driverStandings ds, races r WHERE ds.raceId=r.raceId AND r.year='$year')";
+    //$query .= " AND r.round=(SELECT MAX(races.round) FROM races, results WHERE races.year='$year' AND races.raceId=results.raceId)";
+    $query .= " AND r.round=(SELECT MAX(races.round) FROM races, driverStandings WHERE races.year='$year' AND races.raceId=driverStandings.raceId)";
+
   } else {
     $query .= " AND (r.year, r.round) IN (SELECT year, MAX(round) FROM races GROUP BY year)";
   }
 }
 
 $query .= " ORDER BY r.year, ds.position LIMIT $offset, $limit";
-$result = mysql_query($query) or die('I cannot select from the database because: ' . mysql_error());
+$result = mysqli_query($mysqli, $query) or die('I cannot select from the database because: ' . mysqli_error());
 
 $query = "SELECT FOUND_ROWS()";
-$found_rows_result = mysql_query($query) or die('I cannot select from the database because: ' . mysql_error());
-$row = mysql_fetch_row($found_rows_result);
+$found_rows_result = mysqli_query($mysqli, $query) or die('I cannot select from the database because: ' . mysqli_error());
+$row = mysqli_fetch_row($found_rows_result);
 $total = $row[0];
-$previousYear = NULL
+$previousYear = NULL;
 
 if(strcmp($format, "xml") == 0) {
   doXMLHeader($url, $series, $limit, $offset, $total);
@@ -37,7 +40,7 @@ if(strcmp($format, "xml") == 0) {
   if(isset($driverStandings)) echo " driverStandings=\"$driverStandings\"";
 
   echo ">\n";
-  while($row = @mysql_fetch_array($result)) {
+  while($row = @mysqli_fetch_array($result)) {
     $driverId = $row[0];
     $driverRef = $row[1];
     $permanentNumber = $row[2];
@@ -75,7 +78,7 @@ if(strcmp($format, "xml") == 0) {
     echo "\t\t\t\t</Driver>\n";
     
     $constructorResult = getConstructors($year, $round, $driverId);
-    while($constructorRow = @mysql_fetch_array($constructorResult)) {
+    while($constructorRow = @mysqli_fetch_array($constructorResult)) {
       $constructorRef = $constructorRow[0];
       $constr_name = $constructorRow[1];
       $constr_nationality = $constructorRow[2];
@@ -102,10 +105,10 @@ if(strcmp($format, "xml") == 0) {
   if(isset($driver)) echo "\"driverId\":\"$driver\",";
   if(isset($driverStandings)) echo "\"driverStandings\":\"$driverStandings\",";
   
-  $numRows = mysql_num_rows($result);
+  $numRows = mysqli_num_rows($result);
   echo "\"StandingsLists\":[";
   if($numRows > 0) {
-    while($row = @mysql_fetch_array($result)) {
+    while($row = @mysqli_fetch_array($result)) {
       $driverId = $row[0];
       $driverRef = $row[1];
       $permanentNumber = $row[2];
@@ -153,11 +156,11 @@ if(strcmp($format, "xml") == 0) {
       echo "},";
 
       $constructorResult = getConstructors($year, $round, $driverId);
-      $numRows = mysql_num_rows($constructorResult);
+      $numRows = mysqli_num_rows($constructorResult);
       echo "              \"Constructors\":[";
       if($numRows > 0) {
         for($i=1; $i<=$numRows; $i++) {
-          $constructorRow = @mysql_fetch_array($constructorResult);
+          $constructorRow = @mysqli_fetch_array($constructorResult);
           $constructorRef = $constructorRow[0];
           $constr_name = $constructorRow[1];
           $constr_nationality = $constructorRow[2];
@@ -185,11 +188,12 @@ if(strcmp($format, "xml") == 0) {
 }
 
 function getConstructors($year, $round, $driverId) {
+  include("f1dbro.inc");
   $query = "SELECT DISTINCT c.constructorRef, c.name, c.nationality, c.url FROM constructors c, results re, races ra";
   $query .= " WHERE re.raceId=ra.raceId AND re.driverId='$driverId' AND c.constructorId=re.constructorId";
   $query .= " AND ra.year='$year'"; 
   $query .= " AND ra.round<='$round'";
-  $result = mysql_query($query) or die('I cannot select from the database because: ' . mysql_error());
+  $result = mysqli_query($mysqli, $query) or die('I cannot select from the database because: ' . mysqli_error());
   return $result;
 }
 ?>

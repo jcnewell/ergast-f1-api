@@ -1,7 +1,7 @@
 <?php
 if($driverStandings || $constructorStandings) error(400, "Bad Request: Race queries do not support standings qualifiers.");
 
-$query = "SELECT SQL_CALC_FOUND_ROWS ra.year, ra.round, ra.name, ra.date, ra.time, ra.url, c.circuitRef, c.name, c.location, c.country, c.lat, c.lng, c.alt, c.url FROM races ra, circuits c";
+$query = "SELECT SQL_CALC_FOUND_ROWS ra.year, ra.round, ra.name, ra.date, ra.time, ra.url, ra.fp1_date, ra.fp1_time, ra.fp2_date, ra.fp2_time, ra.fp3_date, ra.fp3_time, ra.quali_date, ra.quali_time, ra.sprint_date, ra.sprint_time, c.circuitRef, c.name, c.location, c.country, c.lat, c.lng, c.alt, c.url FROM races ra, circuits c";
 
 if($driver || $constructor || $grid || $results || $status || $fastest) $query .= ", results re";
 if($driver) $query .= ", drivers";
@@ -20,11 +20,11 @@ if($results) $query .= " AND re.positionText='$results'";
 $query .= " ORDER BY ra.year, ra.round LIMIT $offset, $limit";
 
 //echo "$query<br>\n<br>\n";
-$result = mysql_query($query) or die('I cannot select from the database because: ' . mysql_error());
+$result = mysqli_query($mysqli, $query) or die('I cannot select from the database because: ' . mysqli_error());
 if($result) {
   $query = "SELECT FOUND_ROWS()";
-  $found_rows_result = mysql_query($query) or die('I cannot select from the database because: ' . mysql_error());
-  $row = mysql_fetch_row($found_rows_result);
+  $found_rows_result = mysqli_query($mysqli, $query) or die('I cannot select from the database because: ' . mysqli_error());
+  $row = mysqli_fetch_row($found_rows_result);
   $total = $row[0];
   if(strcmp($format, "xml") == 0) {
     doXMLHeader($url, $series, $limit, $offset, $total);
@@ -39,21 +39,32 @@ if($result) {
     if(isset($results)) echo " position=\"$results\"";
     if(isset($status)) echo " statusId=\"$status\"";
     echo ">\n";
-    while($row = @mysql_fetch_array($result)) {
+    while($row = @mysqli_fetch_array($result)) {
       $season = $row[0];
       $round = $row[1];
       $raceName = $row[2];
       $date = $row[3];
       $start = $row[4];
       $raceUrl = $row[5];
-      $circuitId = $row[6];
-      $circuitName = $row[7];
-      $locality = $row[8];
-      $country= $row[9];
-      $lat = $row[10];
-      $long = $row[11];
-      $alt = $row[12];
-      $circuitUrl = $row[13];
+      $fp1Date = $row[6];
+      $fp1Time = $row[7];
+      $fp2Date = $row[8];
+      $fp2Time = $row[9];
+      $fp3Date = $row[10];
+      $fp3Time = $row[11];
+      $qualiDate = $row[12];
+      $qualiTime = $row[13];
+      $sprintDate = $row[14];
+      $sprintTime = $row[15];
+      $circuitId = $row[16];
+      $circuitName = $row[17];
+      $locality = $row[18];
+      $country= $row[19];
+      $lat = $row[20];
+      $long = $row[21];
+      $alt = $row[22];
+      $circuitUrl = $row[23];
+      
       echo "\t\t<Race season=\"$season\" round=\"$round\"";
       if($raceUrl) echo " url=\"$raceUrl\"";
       echo ">\n";
@@ -70,10 +81,75 @@ if($result) {
         $start .= "Z";
         echo "\t\t\t<Time>$start</Time>\n";
       }
+      
+      if($fp1Date) {
+        echo "\t\t\t<FirstPractice>\n";
+        echo "\t\t\t\t<Date>$fp1Date</Date>\n";
+        if($fp1Time) {
+          $fp1Time .= "Z";
+          echo "\t\t\t\t<Time>$fp1Time</Time>\n";
+        }
+        echo "\t\t\t</FirstPractice>\n";
+      }
+      
+      if($sprintDate) {
+        if($qualiDate) {
+          echo "\t\t\t<Qualifying>\n";
+          echo "\t\t\t\t<Date>$qualiDate</Date>\n";
+          if($qualiTime) {
+            $qualiTime .= "Z";
+            echo "\t\t\t\t<Time>$qualiTime</Time>\n";
+          }
+          echo "\t\t\t</Qualifying>\n";
+        }
+      }
+      
+      if($fp2Date) {
+        echo "\t\t\t<SecondPractice>\n";
+        echo "\t\t\t\t<Date>$fp2Date</Date>\n";
+        if($fp2Time) {
+          $fp2Time .= "Z";
+          echo "\t\t\t\t<Time>$fp2Time</Time>\n";
+        }
+        echo "\t\t\t</SecondPractice>\n";
+      }
+      
+      if($fp3Date) {
+        echo "\t\t\t<ThirdPractice>\n";
+        echo "\t\t\t\t<Date>$fp3Date</Date>\n";
+        if($fp3Time) {
+          $fp3Time .= "Z";
+          echo "\t\t\t\t<Time>$fp3Time</Time>\n";
+        }
+        echo "\t\t\t</ThirdPractice>\n";
+      }
+      
+      if($sprintDate) {
+        echo "\t\t\t<Sprint>\n";
+        echo "\t\t\t\t<Date>$sprintDate</Date>\n";
+        if($sprintTime) {
+          $sprintTime .= "Z";
+          echo "\t\t\t\t<Time>$sprintTime</Time>\n";
+        }
+        echo "\t\t\t</Sprint>\n";
+      
+      } else {
+        if($qualiDate) {
+          echo "\t\t\t<Qualifying>\n";
+          echo "\t\t\t\t<Date>$qualiDate</Date>\n";
+          if($qualiTime) {
+            $qualiTime .= "Z";
+            echo "\t\t\t\t<Time>$qualiTime</Time>\n";
+          }
+          echo "\t\t\t</Qualifying>\n";
+        }
+      }
+      
       echo "\t\t</Race>\n";
     }
     echo "\t</RaceTable>\n";
     echo "</MRData>\n";
+  
   } elseif(strcmp($format, "json") == 0) {
     
     if($callback) {
@@ -92,25 +168,35 @@ if($result) {
     if(isset($results)) echo "\"position\":\"$results\",";
     if(isset($status)) echo "\"status\":\"$status\",";
     
-    $numRows = mysql_num_rows($result);
+    $numRows = mysqli_num_rows($result);
     echo "\"Races\":[";
     if($numRows > 0) {
       for($i=1; $i<=$numRows; $i++) {
-        $row = @mysql_fetch_array($result);
+        $row = @mysqli_fetch_array($result);
         $season = $row[0];
         $round = $row[1];
         $raceName = $row[2];
         $date = $row[3];
         $start = $row[4];
         $raceUrl = escape($row[5]);
-        $circuitId = $row[6];
-        $circuitName = $row[7];
-        $locality = $row[8];
-        $country= $row[9];
-        $lat = $row[10];
-        $long = $row[11];
-        $alt = $row[12];
-        $circuitUrl = escape($row[13]);
+        $fp1Date = $row[6];
+        $fp1Time = $row[7];
+        $fp2Date = $row[8];
+        $fp2Time = $row[9];
+        $fp3Date = $row[10];
+        $fp3Time = $row[11];
+        $qualiDate = $row[12];
+        $qualiTime = $row[13];
+        $sprintDate = $row[14];
+        $sprintTime = $row[15];
+        $circuitId = $row[16];
+        $circuitName = $row[17];
+        $locality = $row[18];
+        $country= $row[19];
+        $lat = $row[20];
+        $long = $row[21];
+        $alt = $row[22];
+        $circuitUrl = escape($row[23]);
         echo "{";     
         echo "\"season\":\"$season\",";
         echo "\"round\":\"$round\",";
@@ -127,10 +213,75 @@ if($result) {
         echo "\"country\":\"$country\"";
         echo "}},";
         echo "\"date\":\"$date\"";
+        
         if($start) {
           $start .= "Z";
            echo ",\"time\":\"$start\"";
         }
+        
+        if($fp1Date) {
+          echo ",\"FirstPractice\":{";
+            echo "\"date\":\"$fp1Date\"";
+            if($fp1Time) {
+              $fp1Time .= "Z";
+              echo ",\"time\":\"$fp1Time\"";
+            }
+          echo "}";
+        }
+        
+        if($sprintDate) {
+          if($qualiDate) {
+            echo ",\"Qualifying\":{";
+            echo "\"date\":\"$qualiDate\"";
+            if($qualiTime) {
+               $qualiTime .= "Z";
+               echo ",\"time\":\"$qualiTime\"";
+            }
+            echo "}";
+          }
+        }
+        
+        if($fp2Date) {
+          echo ",\"SecondPractice\":{";
+          echo "\"date\":\"$fp2Date\"";
+          if($fp2Time) {
+             $fp2Time .= "Z";
+             echo ",\"time\":\"$fp2Time\"";
+          }
+          echo "}";
+        }
+        
+        if($fp3Date) {
+          echo ",\"ThirdPractice\":{";
+          echo "\"date\":\"$fp3Date\"";
+          if($fp3Time) {
+             $fp3Time .= "Z";
+             echo ",\"time\":\"$fp3Time\"";
+          }
+          echo "}";
+        }
+        
+        if($sprintDate) {
+          echo ",\"Sprint\":{";
+          echo "\"date\":\"$sprintDate\"";
+          if($sprintTime) {
+             $sprintTime .= "Z";
+             echo ",\"time\":\"$sprintTime\"";
+          }
+          echo "}";
+        
+        } else {
+          if($qualiDate) {
+            echo ",\"Qualifying\":{";
+            echo "\"date\":\"$qualiDate\"";
+            if($qualiTime) {
+               $qualiTime .= "Z";
+               echo ",\"time\":\"$qualiTime\"";
+            }
+            echo "}";
+          }
+        }
+        
         if($i == $numRows) {
           echo "}";
         } else {

@@ -2,7 +2,7 @@
 $user="root";
 $password="f1";
 $database="ergastdb";
-$connection = mysql_connect("ergastdb", $user, $password);
-mysql_set_charset("utf8", $connection);
-@mysql_select_db($database, $connection) or die("Unable to select database");
+$mysqli = mysqli_connect("localhost", $user, $password);
+mysqli_set_charset($mysqli, "utf8");
+@mysqli_select_db($mysqli, $database) or die( "Unable to select database");
 ?>

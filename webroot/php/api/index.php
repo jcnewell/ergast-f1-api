@@ -13,7 +13,11 @@ if($period !== FALSE) {
   $format = "xml";  // Default. 
 }
 
-parse_str($urlComponents['query'], $fields);
+if(array_key_exists('query', $urlComponents)) {
+  parse_str($urlComponents['query'], $fields);
+} else {
+  $fields = array();
+}
 
 if(array_key_exists('limit', $fields)) {
   $limit = intval($fields['limit']);
@@ -25,7 +29,10 @@ if(!isset($limit)) $limit = 30;
 #if($limit > 1000) $limit = 1000;
 if(!isset($offset)) $offset = 0;
 
-$callback = $fields['callback'];
+$callback = NULL;
+if(array_key_exists('callback', $fields)) {
+  $callback = $fields['callback'];
+}
 if(isset($callback)) {
   if(!isValidCallback($callback)) {
     error(400, "Bad Request");
@@ -48,29 +55,37 @@ $key = "races";
 $year = NULL;
 $round = NULL;
 
-if(strcmp($segments[3], "current") == 0) {
-  $year = currentYear();
-  $n = 4;
-  $key = "races";
-} elseif(strlen($segments[3]) == 4 && is_numeric($segments[3])) {
-  $year = intval($segments[3]);
-  $n = 4;
-  $key = "races";
+if(isset($segments[3])) {
+  if(strcmp($segments[3], "current") == 0) {
+    $year = currentYear();
+    $n = 4;
+    $key = "races";
+  } elseif(strlen($segments[3]) == 4 && is_numeric($segments[3])) {
+    $year = intval($segments[3]);
+    $n = 4;
+    $key = "races";
+  }
 }
 
-if($n == 4) {
-  if(strcmp($segments[4], "last") == 0) {
-    $round = lastRound($year);
-    if(!$round) error(404, "Round Not Found"); 
-    $n = 5;
-  } elseif(strcmp($segments[4], "next") == 0) {
-    $next = nextRound($year);
-    $year = $next['year'];
-    $round = $next['round'];
-    $n = 5;
-  } elseif(strlen($segments[4]) < 3 && is_numeric($segments[4])) {
-    $round = intval($segments[4]);
-    $n = 5;
+if(isset($segments[4])) {
+  if($n == 4) {
+    if(strcmp($segments[4], "last") == 0) {
+      $round = lastRound($year);
+      //$next = lastRound($year);
+      //$year = $last['year'];
+      //$round = $last['round'];
+      if(!$round) error(404, "Round Not Found");
+      $n = 5;
+    } elseif(strcmp($segments[4], "next") == 0) {
+      $next = nextRound($year);
+      $year = $next['year'];
+      $round = $next['round'];
+      if(!$round) error(404, "Round Not Found");
+      $n = 5;
+    } elseif(strlen($segments[4]) < 3 && is_numeric($segments[4])) {
+      $round = intval($segments[4]);
+      $n = 5;
+    }
   }
 }
 
@@ -86,6 +101,7 @@ $constructorStandings = NULL;
 $grid = NULL;
 $fastest = NULL;
 $qualifying = NULL;
+$sprint = NULL;
 
 for($i=$n; $i<$n+17; $i+=2) {
   if(isset($segments[$i])) {
@@ -106,7 +122,7 @@ for($i=$n; $i<$n+17; $i+=2) {
         if($constructor) {
           error(400, "Bad Request");
         } else {
-          if($segments[$i+1]) {
+          if(isset($segments[$i+1])) {
             $constructor = clean($segments[$i+1]);
           } else {
             break 2;
@@ -117,7 +133,7 @@ for($i=$n; $i<$n+17; $i+=2) {
         if($circuit) {
           error(400, "Bad Request");
         } else {
-          if($segments[$i+1]) {
+          if(isset($segments[$i+1])) {
             $circuit = clean($segments[$i+1]);
           } else {
             break 2;
@@ -128,7 +144,7 @@ for($i=$n; $i<$n+17; $i+=2) {
         if($status) {
           error(400, "Bad Request");
         } else {
-          if($segments[$i+1]) {
+          if(isset($segments[$i+1])) {
             $status = clean($segments[$i+1]);
           } else {
             break 2;
@@ -139,22 +155,18 @@ for($i=$n; $i<$n+17; $i+=2) {
         if($results) {
           error(400, "Bad Request");
         } else {
-          if($segments[$i+1]) {
-            if(is_numeric($segments[$i+1])) {
-              $results = intval($segments[$i+1]);
-            } else {
-              error(400, "Bad Request");
-            }
+          if(isset($segments[$i+1])) {
+            $results = clean($segments[$i+1]);
           } else {
             break 2;
-          }        
+          }
         }
         break;
       case "laps":
         if($laps) {
           error(400, "Bad Request");
         } else {
-          if($segments[$i+1]) {
+          if(isset($segments[$i+1])) {
             if(is_numeric($segments[$i+1])) {
               $laps = intval($segments[$i+1]);
             } else {
@@ -169,7 +181,7 @@ for($i=$n; $i<$n+17; $i+=2) {
         if($pitstops) {
           error(400, "Bad Request");
         } else {
-          if($segments[$i+1]) {
+          if(isset($segments[$i+1])) {
             if(is_numeric($segments[$i+1])) {
               $pitstops = intval($segments[$i+1]);
             } else {
@@ -184,7 +196,7 @@ for($i=$n; $i<$n+17; $i+=2) {
         if($driverStandings) {
           error(400, "Bad Request");
         } else {
-          if($segments[$i+1]) {
+          if(isset($segments[$i+1])) {
             if(is_numeric($segments[$i+1])) {
               $driverStandings = intval($segments[$i+1]);
             } else {
@@ -199,7 +211,7 @@ for($i=$n; $i<$n+17; $i+=2) {
         if($constructorStandings) {
           error(400, "Bad Request");
         } else {
-          if($segments[$i+1]) {
+          if(isset($segments[$i+1])) {
             if(is_numeric($segments[$i+1])) {
               $constructorStandings = intval($segments[$i+1]);
             } else {
@@ -226,7 +238,7 @@ for($i=$n; $i<$n+17; $i+=2) {
         if($fastest) {
           error(400, "Bad Request");
         } else {
-          if($segments[$i+1] && is_numeric($segments[$i+1])) {
+          if(isset($segments[$i+1]) && is_numeric($segments[$i+1])) {
             $fastest = intval($segments[$i+1]);
           } else {
             // "fastest" cannot be last element.
@@ -238,7 +250,7 @@ for($i=$n; $i<$n+17; $i+=2) {
         if($qualifying) {
           error(400, "Bad Request");
         } else {
-          if($segments[$i+1]) {
+          if(isset($segments[$i+1])) {
             if(is_numeric($segments[$i+1])) {
               $qualifying = intval($segments[$i+1]);
             } else {
@@ -249,13 +261,24 @@ for($i=$n; $i<$n+17; $i+=2) {
           }        
         }
         break;
-        //if(isset($segments[$i+1])) {
-        //  // "qualifying" can only be last segment.
-        //  error(400, "Bad Request");
-        //} else {
-        //  break 2;
-        //}
-        //break;
+//        if(isset($segments[$i+1])) {
+//          // "qualifying" can only be last segment.
+//          error(400, "Bad Request");
+//        } else {
+//          break 2;
+//        }
+//        break;
+      case "sprint":
+        if($sprint) {
+          error(400, "Bad Request");
+        } else {
+          if(isset($segments[$i+1])) {
+            $sprint = clean($segments[$i+1]);
+          } else {
+            break 2;
+          }
+        }
+        break;
       case "seasons":
         if(isset($segments[$i+1])) {
           // "seasons" can only be last segment.
@@ -279,6 +302,11 @@ for($i=$n; $i<$n+17; $i+=2) {
     break;
   }
 }
+//echo "year=$year round=$round key=$key<br>\n";
+//echo "driver=$driver<br>\n";
+//echo "constructor=$constructor<br>\n";
+//echo "circuit=$circuit<br>\n";
+//echo "status=$status<br>\n";
 
 if($limit > 1000) {
   if(strcmp($key, "laps") == 0) {
@@ -315,6 +343,9 @@ switch($key) {
     break;
   case "qualifying":
     include("Qualifying.inc");    
+    break;
+  case "sprint":
+    include("SprintResults.inc");
     break;
   case "driverstandings":
     include("DriverStandings.inc");    
