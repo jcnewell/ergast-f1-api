@@ -1,3 +1,6 @@
+# The Ergast API is now Deprecated
+The Ergast API has been superceded by [jolpica-f1](https://github.com/jolpica/jolpica-f1)
+
 # Ergast nodeJS API
 In this period we are working to improve the server, specifically we want to make it faster in response times. 
 After analyzing our current architecture we realized that using PHP is not the best and therefore we are moving to nodeJS. 
